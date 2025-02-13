@@ -1,14 +1,14 @@
-import React from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {
-  DummyDoctor1,
-  DummyDoctor2,
-  DummyDoctor3,
-  DummyNews1,
-  DummyNews2,
-  DummyNews3,
-  ILNullPhoto,
-} from '../../assets';
+  get,
+  limitToLast,
+  onValue,
+  orderByChild,
+  query,
+  ref,
+} from 'firebase/database';
+import React, {useEffect, useState} from 'react';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ILNullPhoto} from '../../assets';
 import {
   DoctorCategory,
   Gap,
@@ -16,9 +16,112 @@ import {
   NewsItem,
   RatedDoctor,
 } from '../../components';
-import {colors, fonts} from '../../utils';
+import {db} from '../../config';
+import {colors, fonts, getData, showError} from '../../utils';
 
 const Doctor = ({navigation}) => {
+  const [profile, setProfile] = useState({
+    fullName: '',
+    profession: '',
+    photo: ILNullPhoto,
+  });
+  const [news, setNews] = useState([]);
+  const [categoryDoctor, setCategoryDoctor] = useState([]);
+  const [doctors, setDoctors] = useState([]);
+
+  useEffect(() => {
+    getUserData();
+    getNews();
+    getCategoryDoctor();
+    getTopRatedDoctor();
+    const unsubscribe = navigation.addListener('focus', () => {
+      getUserData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const getNews = () => {
+    const newsRef = ref(db, 'news/');
+    onValue(
+      newsRef,
+      snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const filterData = data.filter(el => el !== null);
+          const parseArray = Object.keys(filterData).map(key => ({
+            id: key,
+            ...filterData[key],
+          }));
+          setNews(parseArray);
+        } else {
+          setNews([]);
+        }
+      },
+      error => {
+        console.error('Error fetching news:', error);
+      },
+    );
+  };
+
+  const getCategoryDoctor = () => {
+    const categoryDoctorRef = ref(db, 'category_doctor/');
+    onValue(
+      categoryDoctorRef,
+      snapshot => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const filterData = data.filter(el => el !== null);
+          const parseArray = Object.keys(filterData).map(key => ({
+            id: key,
+            ...filterData[key],
+          }));
+          setCategoryDoctor(parseArray);
+        } else {
+          setCategoryDoctor([]);
+        }
+      },
+      error => {
+        console.error('Error fetching category doctor:', error);
+      },
+    );
+  };
+
+  const getTopRatedDoctor = async () => {
+    try {
+      const topRatedDoctorRef = query(
+        ref(db, 'doctors'),
+        orderByChild('rate'),
+        limitToLast(3),
+      );
+      const snapshot = await get(topRatedDoctorRef);
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const parseArray = Object.keys(data).map(key => ({
+          id: key,
+          ...data[key],
+        }));
+        setDoctors(parseArray);
+      } else {
+        console.log('Tidak ada data dokter.');
+        setDoctors([]);
+      }
+    } catch (err) {
+      console.error('Error:', err.message);
+      showError(err.message);
+    }
+  };
+
+  const getUserData = () => {
+    getData('user').then(res => {
+      if (res) {
+        setProfile({
+          ...res,
+          photo: typeof res.photo === 'string' ? {uri: res.photo} : ILNullPhoto,
+        });
+      }
+    });
+  };
+
   return (
     <View style={styles.page}>
       <View style={styles.content}>
@@ -26,8 +129,8 @@ const Doctor = ({navigation}) => {
           <View style={styles.wrapperSection}>
             <Gap height={30} />
             <HomeProfile
-              profile={ILNullPhoto}
-              onPress={() => navigation.navigate('UserProfile')}
+              profile={profile}
+              onPress={() => navigation.navigate('UserProfile', profile)}
             />
             <Text style={styles.welcome}>
               Mau konsultasi dengan siapa hari ini?
@@ -37,62 +140,39 @@ const Doctor = ({navigation}) => {
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.category}>
                 <Gap width={32} />
-                <DoctorCategory
-                  category="dokter umum"
-                  onPress={() => navigation.navigate('ChooseDoctor')}
-                />
-                <DoctorCategory
-                  category="psikiater"
-                  onPress={() => navigation.navigate('ChooseDoctor')}
-                />
-                <DoctorCategory
-                  category="dokter obat"
-                  onPress={() => navigation.navigate('ChooseDoctor')}
-                />
-                <DoctorCategory
-                  category="dokter anak"
-                  onPress={() => navigation.navigate('ChooseDoctor')}
-                />
+                {categoryDoctor.map(item => (
+                  <DoctorCategory
+                    key={`category${item.id}`}
+                    category={item.category}
+                    onPress={() => navigation.navigate('ChooseDoctor', item)}
+                  />
+                ))}
                 <Gap width={22} />
               </View>
             </ScrollView>
           </View>
           <View style={styles.wrapperSection}>
-            <Text style={styles.sectionLabel}>Top Rated Doctors</Text>
-            <RatedDoctor
-              name={'Alexa Rachel'}
-              desc={'Pediatrician'}
-              avatar={DummyDoctor1}
-              onPress={() => navigation.navigate('DoctorProfile')}
-            />
-            <RatedDoctor
-              name={'Sunny Frank'}
-              desc={'Dentist'}
-              avatar={DummyDoctor2}
-            />
-            <RatedDoctor
-              name={'Poe Minn'}
-              desc={'Podiatrist'}
-              avatar={DummyDoctor3}
-            />
-            <Text style={styles.sectionLabel}>Good News</Text>
+            <Text style={styles.sectionLabelTopRate}>Top Rated Doctors</Text>
+            {doctors.map(doctor => (
+              <RatedDoctor
+                key={doctor.id}
+                name={doctor.fullName}
+                desc={doctor.profession}
+                avatar={{uri: doctor.photo}}
+                onPress={() => navigation.navigate('DoctorProfile', doctor)}
+              />
+            ))}
+            <Text style={styles.sectionLabelNews}>Good News</Text>
           </View>
-          <NewsItem
-            title={'Is it safe to stay at home during coronavirus?'}
-            date={'Today'}
-            image={DummyNews1}
-          />
-          <NewsItem
-            title={'Consume yellow citrus helps you healthier'}
-            date={'Today'}
-            image={DummyNews2}
-          />
-          <NewsItem
-            title={'Learn how to make a proper orange juice at home'}
-            date={'Today'}
-            image={DummyNews3}
-          />
-          <Gap height={30} />
+          {news.map(item => (
+            <NewsItem
+              key={`news-${item.id}`}
+              title={item.title}
+              date={item.date}
+              image={item.image}
+            />
+          ))}
+          <Gap height={10} />
         </ScrollView>
       </View>
     </View>
@@ -123,11 +203,26 @@ const styles = StyleSheet.create({
   },
   category: {flexDirection: 'row'},
   wrapperScroll: {marginHorizontal: -16},
-  sectionLabel: {
+  sectionLabelNews: {
+    fontSize: 16,
+    fontFamily: fonts.primary[600],
+    color: colors.text.primary,
+    marginTop: 20,
+    marginBottom: 10,
+  },
+
+  sectionLabelTopRate: {
     fontSize: 16,
     fontFamily: fonts.primary[600],
     color: colors.text.primary,
     marginTop: 30,
-    marginBottom: 16,
+    marginBottom: 30,
+  },
+  noNews: {
+    textAlign: 'center',
+    color: colors.text.secondary,
+    fontSize: 14,
+    fontFamily: fonts.primary[400],
+    marginTop: 10,
   },
 });

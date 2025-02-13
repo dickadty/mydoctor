@@ -1,17 +1,18 @@
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {DummyDoctor1} from '../../assets';
-import {ChatItem, Header, InputChat} from '../../components';
-import {colors, fonts} from '../../utils';
+import { StyleSheet, Text, View } from 'react-native';
+import { ChatItem, Header, InputChat } from '../../components';
+import { colors, fonts } from '../../utils';
 
-const Chatting = ({navigation}) => {
+const Chatting = ({navigation,route}) => {
+  const doctor = route.params;
   return (
     <View style={styles.page}>
       <Header
         type="dark-profile"
-        title={'Nairobi Putri Hayza'}
-        desc={'Dokter Anak'}
-        photo={DummyDoctor1}
+        title={doctor.fullName}
+        name={doctor.fullName}
+        desc={doctor.profession}
+        photo={{uri: doctor.photo}}
         onPress={() => navigation.goBack()}
       />
       <View style={styles.content}>
@@ -24,7 +25,7 @@ const Chatting = ({navigation}) => {
         <ChatItem
           date={'4.45 AM'}
           text={'Oh tentu saja tidak karena jeruk itu sangat sehat...'}
-          photo={DummyDoctor1}
+          photo={{uri: doctor.photo}}
         />
       </View>
       <InputChat />

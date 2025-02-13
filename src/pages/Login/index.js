@@ -1,11 +1,37 @@
+import {signInWithEmailAndPassword} from 'firebase/auth';
+import {get, ref} from 'firebase/database';
 import React from 'react';
 import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {ILLogo} from '../../assets';
 import {Button, Gap, Input, Link} from '../../components';
-import {colors, fonts, useForm} from '../../utils';
+import {auth, db} from '../../config';
+import {colors, fonts, showError, storeData, useForm} from '../../utils';
+import {useDispatch} from 'react-redux';
 
 const Login = ({navigation}) => {
   const [form, setForm] = useForm({email: '', password: ''});
+  const dispatch = useDispatch();
+
+  const onContinue = () => {
+    dispatch({type: 'SET_LOADING', value: true});
+    signInWithEmailAndPassword(auth, form.email, form.password)
+      .then(async userCredential => {
+        const userRef = ref(db, `users/${userCredential.user.uid}`);
+        get(userRef).then(resDB => {
+          if (resDB.val()) {
+            storeData('user', resDB.val());
+            dispatch({type: 'SET_LOADING', value: false});
+            navigation.replace('MainApp');
+          }
+        });
+        // ...
+      })
+      .catch(error => {
+        showError(error.message);
+        dispatch({type: 'SET_LOADING', value: false});
+      });
+  };
+
   return (
     <View style={styles.page}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -27,7 +53,7 @@ const Login = ({navigation}) => {
         <Gap height={10} />
         <Link title="Forgot My Password" size={12} />
         <Gap height={40} />
-        <Button title="Sign In" />
+        <Button title="Sign In" onPress={onContinue} />
         <Gap height={30} />
         <Link
           title="Create New Account"
@@ -50,6 +76,6 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginTop: 40,
     marginBottom: 40,
-    maxWidth: 153,
+    maxWidth: 158,
   },
 });

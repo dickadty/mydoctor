@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingBottom: 16,
+    paddingBottom: 18,
     alignItems: 'center',
   },
   avatar: {width: 50, height: 50, borderRadius: 50 / 2, marginRight: 12},
@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.primary.normal,
     color: colors.text.secondary,
-    marginTop: 2,
+    marginTop: 3,
+    textTransform: 'capitalize',
   },
 });

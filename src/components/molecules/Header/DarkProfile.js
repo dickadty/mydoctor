@@ -1,8 +1,7 @@
 import React from 'react';
-import {StyleSheet, Text, View, Image} from 'react-native';
-import {colors, fonts} from '../../../utils';
-import {Button} from '../../atoms';
-import {DummyDoctor9} from '../../../assets';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import { colors, fonts } from '../../../utils';
+import { Button } from '../../atoms';
 
 const DarkProfile = ({onPress, title, desc, photo}) => {
   return (
@@ -12,7 +11,7 @@ const DarkProfile = ({onPress, title, desc, photo}) => {
         <Text style={styles.name}>{title}</Text>
         <Text style={styles.desc}>{desc}</Text>
       </View>
-      <Image source={photo} style={styles.avatar} />
+      <Image source={photo} style={styles.avatar} />π
     </View>
   );
 };
@@ -44,5 +43,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
     color: colors.text.subTitle,
+    textTransform: 'capitalize',
   },
 });

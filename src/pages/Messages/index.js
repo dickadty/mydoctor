@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { List } from '../../components';
 import { colors, fonts } from '../../utils';
+import { DummyDoctor1 } from '../../assets';
 
 const Messages = ({navigation}) => {
   return (
@@ -10,7 +11,7 @@ const Messages = ({navigation}) => {
         <Text style={styles.title}>Messages</Text>
         <List
           type="next"
-          profile={{uri: 'https://placeimg.com/100/100/people'}}
+          profile={DummyDoctor1}
           name="Alexander Jannie"
           desc="Baik bu, terima kasih banyak atas waktunya..."
           onPress={() => navigation.navigate('Chatting')}

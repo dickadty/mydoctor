@@ -1,7 +1,10 @@
+import {createUserWithEmailAndPassword} from 'firebase/auth';
 import React from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {Button, Gap, Header, Input} from '../../components';
-import {colors, useForm} from '../../utils';
+import {auth, db} from '../../config';
+import {colors, showError, showSuccess, useForm, storeData} from '../../utils';
+import {set, ref} from 'firebase/database';
 
 const Register = ({navigation}) => {
   const [form, setForm] = useForm({
@@ -10,6 +13,36 @@ const Register = ({navigation}) => {
     email: '',
     password: '',
   });
+
+  const onContinue = () => {
+    console.log(form);
+    createUserWithEmailAndPassword(auth, form.email, form.password)
+      .then(userCredential => {
+        console.log('userCredential', userCredential);
+
+        const data = {
+          fullName: form.fullName,
+          profession: form.profession,
+          email: form.email,
+          uid: userCredential.user.uid,
+        };
+        set(ref(db, `users/${userCredential.user.uid}`), data)
+          .then(() => {
+            showSuccess('Register Success');
+            storeData('user', data);
+            console.log('success:', storeData);
+            setForm('reset');
+            navigation.navigate('UploadPhoto', data);
+          })
+          .catch(error => {
+            showError(error.message);
+          });
+      })
+      .catch(error => {
+        showError(error.message);
+      });
+  };
+
   return (
     <View style={styles.page}>
       <Header onPress={() => navigation.goBack()} title="Daftar Akun" />
@@ -40,10 +73,7 @@ const Register = ({navigation}) => {
             secureTextEntry
           />
           <Gap height={40} />
-          <Button
-            title="Continue"
-            onPress={() => navigation.navigate('UploadPhoto')}
-          />
+          <Button title="Continue" onPress={onContinue} />
         </ScrollView>
       </View>
     </View>

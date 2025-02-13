@@ -1,15 +1,14 @@
 import React from 'react';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {colors, fonts} from '../../../utils';
-import { ILNullPhoto } from '../../../assets';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { colors, fonts } from '../../../utils';
 
-const HomeProfile = ({onPress}) => {
+const HomeProfile = ({onPress, profile}) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Image source={ILNullPhoto} style={styles.avatar} />
+      <Image source={profile.photo} style={styles.avatar} />
       <View>
-        <Text style={styles.name}>Dicky Aditya</Text>
-        <Text style={styles.profession}>Mobile Developer</Text>
+        <Text style={styles.name}>{profile.fullName}</Text>
+        <Text style={styles.profession}>{profile.profession}</Text>
       </View>
     </TouchableOpacity>
   );
