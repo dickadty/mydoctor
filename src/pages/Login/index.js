@@ -28,7 +28,7 @@ const Login = ({navigation}) => {
       })
       .catch(error => {
         showError(error.message);
-        dispatch({type: 'SET_LOADING', value: false});
+      dispatch({type: 'SET_LOADING', value: false});
       });
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {
   IconEditProfile,
   IconHelp,
@@ -7,7 +7,7 @@ import {
   IconNext,
   IconRate,
 } from '../../../assets';
-import { colors, fonts } from '../../../utils';
+import {colors, fonts} from '../../../utils';
 
 const List = ({profile, name, desc, type, onPress, icon}) => {
   const Icon = () => {
@@ -30,7 +30,7 @@ const List = ({profile, name, desc, type, onPress, icon}) => {
       {icon ? <Icon /> : <Image source={profile} style={styles.avatar} />}
       <View style={styles.content}>
         <Text style={styles.name}>{name}</Text>
-        <Text style={styles.desc}>{desc}</Text>
+        <Text style={styles.desc}>{desc ? String(desc) : 'No message'}</Text>
       </View>
       {type === 'next' && <IconNext />}
     </TouchableOpacity>

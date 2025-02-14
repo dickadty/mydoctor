@@ -52,6 +52,7 @@ const Doctor = ({navigation}) => {
             id: key,
             ...filterData[key],
           }));
+          console.log('Data news: ', parseArray), 
           setNews(parseArray);
         } else {
           setNews([]);
