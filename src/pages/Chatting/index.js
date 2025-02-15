@@ -17,6 +17,7 @@ const Chatting = ({navigation, route}) => {
     if (user?.uid && doctor?.uid) {
       const chatID = `${user.uid}_${doctor.uid}`;
       const chatRef = ref(db, `chatting/${chatID}/allChat/`);
+
       onValue(
         chatRef,
         snapshot => {
@@ -117,11 +118,7 @@ const Chatting = ({navigation, route}) => {
       />
 
       <View style={styles.content}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          ref={scroll => {
-            this.scroll = scroll;
-          }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
           {chatData.map(chat => {
             return (
               <View key={chat.id}>
@@ -147,6 +144,7 @@ const Chatting = ({navigation, route}) => {
         value={chatContent}
         onChangeText={value => setChatContent(value)}
         onButtonPress={sendChat}
+        targetChat={doctor}
       />
     </View>
   );

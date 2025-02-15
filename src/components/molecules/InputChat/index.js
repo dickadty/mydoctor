@@ -12,7 +12,11 @@ const InputChat = ({value, onChangeText, onButtonPress, targetChat}) => {
         value={value}
         onChangeText={onChangeText}
       />
-      <Button type="btn-icon-send" onPress={onButtonPress} />
+      <Button
+        type="btn-icon-send"
+        onPress={onButtonPress}
+        disable={value.length < 1}
+      />
     </View>
   );
 };
